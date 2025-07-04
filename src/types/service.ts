@@ -1,38 +1,19 @@
 export interface Service {
   id: string;
-  slug: string;
+  sectionId: "audits" | "payroll" | "taxation" | "planning";
   title: string;
   description: string;
-  shortDescription: string;
   price: number;
-  currency: string;
   features: string[];
-  category: "accounting" | "tax" | "bookkeeping" | "consulting";
-  duration: string;
-  popular?: boolean;
   image?: string;
+  subcategory?: string;
+  formFields: ServiceFormField[];
 }
 
-export interface ServiceCategory {
-  id: string;
+export interface ServiceFormField {
   name: string;
-  description: string;
-  services: Service[];
-}
-
-export interface CheckoutSession {
-  id: string;
-  serviceId: string;
-  amount: number;
-  currency: string;
-  status: "pending" | "completed" | "failed";
-  customerEmail?: string;
-  createdAt: Date;
-}
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  orders: CheckoutSession[];
+  label: string;
+  variant: "text" | "email" | "number" | "dropdown" | "textarea";
+  required?: boolean;
+  options?: string[];
 }

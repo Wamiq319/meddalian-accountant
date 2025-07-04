@@ -11,27 +11,28 @@ import {
   FaLightbulb,
   FaChevronDown,
 } from "react-icons/fa";
-import { useServiceSections } from "@/hooks/useServices";
+import { useServices } from "@/hooks/useServices";
+import { Service } from "@/types/service";
 
-const HERO_BUTTONS = [
+const SECTIONS = [
   {
     id: "audits",
-    label: "Audits",
+    label: "Audits & Compliance",
     icon: <FaRegFileAlt className="w-5 h-5 mr-2" />,
   },
   {
     id: "payroll",
-    label: "Payroll",
+    label: "Payroll Services",
     icon: <FaMoneyCheckAlt className="w-5 h-5 mr-2" />,
   },
   {
     id: "taxation",
-    label: "Taxation",
+    label: "Taxation Services",
     icon: <FaPercent className="w-5 h-5 mr-2" />,
   },
   {
     id: "planning",
-    label: "Planning",
+    label: "Business Start-up & Planning",
     icon: <FaLightbulb className="w-5 h-5 mr-2" />,
   },
 ];
@@ -46,7 +47,6 @@ function scrollToSection(id: string) {
 }
 
 export default function Home() {
-  const sections = useServiceSections();
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
@@ -73,7 +73,7 @@ export default function Home() {
               hassle-free.
             </p>
             <div className="flex flex-wrap justify-center gap-4 w-full mt-4">
-              {HERO_BUTTONS.map((btn) => (
+              {SECTIONS.map((btn) => (
                 <button
                   key={btn.id}
                   onClick={() => scrollToSection(btn.id)}
@@ -81,7 +81,6 @@ export default function Home() {
                 >
                   {btn.icon}
                   {btn.label}
-                  <FaChevronDown className="ml-2 w-4 h-4" />
                 </button>
               ))}
             </div>
@@ -106,33 +105,136 @@ export default function Home() {
         </section>
 
         {/* Service Sections */}
-        <div className="space-y-10 max-w-4xl mx-auto w-full px-4">
-          {sections.map((section) => (
-            <section key={section.title} id={section.id}>
-              <h2 className="text-2xl font-semibold mb-4 text-blue-700">
-                {section.title}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {section.items.map((item) => (
-                  <div
-                    key={item}
-                    className="bg-white shadow rounded-lg p-6 flex flex-col justify-between"
-                  >
-                    <div>
-                      <h3 className="text-lg font-bold mb-2 text-gray-900">
-                        {item}
-                      </h3>
-                      <p className="text-gray-600 mb-4">
-                        Professional service for {item.toLowerCase()}.
-                      </p>
+        <div className="space-y-6 w-full px-14">
+          {SECTIONS.map((section) => {
+            const services = useServices(section.id as Service["sectionId"]);
+            // Group services by subcategory if present
+            const subcategories = Array.from(
+              new Set(services.map((s) => s.subcategory).filter(Boolean))
+            );
+            // If there are subcategories, render by group
+            if (subcategories.length > 0) {
+              return (
+                <section key={section.id} id={section.id}>
+                  <div className="flex flex-col items-center mb-4">
+                    <div className="flex items-center justify-center text-blue-700 text-3xl mb-2">
+                      {section.icon}
                     </div>
-                    <Button className="w-full mt-2">Buy Now</Button>
+                    <h2 className="text-3xl font-bold text-blue-700 text-center">
+                      {section.label}
+                    </h2>
                   </div>
-                ))}
-              </div>
-            </section>
-          ))}
+                  {subcategories.map((subcat) => (
+                    <div key={subcat} className="mb-2 mt-6">
+                      <h3 className="text-xl font-semibold text-[#e94e1b] mb-2">
+                        {subcat}
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3">
+                        {services
+                          .filter((s) => s.subcategory === subcat)
+                          .map((service) => (
+                            <div
+                              key={service.id}
+                              className="bg-white shadow rounded-lg p-4 flex flex-col justify-between min-h-0"
+                            >
+                              <div>
+                                <h4 className="text-lg font-bold mb-2 text-gray-900">
+                                  {service.title}
+                                </h4>
+                                <p className="text-gray-600 mb-2">
+                                  {service.description}
+                                </p>
+                                <ul className="list-disc list-inside text-gray-700 mb-2">
+                                  {service.features.map((feature, idx) => (
+                                    <li key={idx}>{feature}</li>
+                                  ))}
+                                </ul>
+                                <div className="text-xl font-bold text-[#e94e1b] mb-2">
+                                  ${service.price}
+                                </div>
+                              </div>
+                              <Button
+                                className="w-full mt-1"
+                                onClick={() =>
+                                  (window.location.href = `/form/${service.id}`)
+                                }
+                              >
+                                Book Now
+                              </Button>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+                </section>
+              );
+            }
+            // If no subcategories, render as a flat list
+            return (
+              <section key={section.id} id={section.id}>
+                <div className="flex flex-col items-center mb-4">
+                  <div className="flex items-center justify-center text-blue-700 text-3xl mb-2">
+                    {section.icon}
+                  </div>
+                  <h2 className="text-3xl font-bold text-blue-700 text-center">
+                    {section.label}
+                  </h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3">
+                  {services.map((service) => (
+                    <div
+                      key={service.id}
+                      className="bg-white shadow rounded-lg p-4 flex flex-col justify-between min-h-0"
+                    >
+                      <div>
+                        <h3 className="text-lg font-bold mb-2 text-gray-900">
+                          {service.title}
+                        </h3>
+                        <p className="text-gray-600 mb-2">
+                          {service.description}
+                        </p>
+                        <ul className="list-disc list-inside text-gray-700 mb-2">
+                          {service.features.map((feature, idx) => (
+                            <li key={idx}>{feature}</li>
+                          ))}
+                        </ul>
+                        <div className="text-xl font-bold text-[#e94e1b] mb-2">
+                          ${service.price}
+                        </div>
+                      </div>
+                      <Button
+                        className="w-full mt-1"
+                        onClick={() =>
+                          (window.location.href = `/form/${service.id}`)
+                        }
+                      >
+                        Book Now
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
+        {/* Free Consultation Section */}
+        <section className="w-full bg-blue-50 py-12 mt-10 flex flex-col items-center justify-center text-center rounded-lg shadow-inner">
+          <h2 className="text-3xl font-bold text-blue-700 mb-4">
+            Book a Free Consultation Call
+          </h2>
+          <p className="text-lg text-gray-700 mb-6 max-w-xl">
+            Not sure which service is right for you? Schedule a free,
+            no-obligation consultation call with one of our expert accountants.
+            We'll help you find the best solution for your business or personal
+            needs.
+          </p>
+          <a
+            href="/consultation"
+            className="inline-block bg-[#e94e1b] text-white font-semibold rounded-full px-8 py-4 text-lg shadow hover:bg-[#c43d13] transition-colors duration-200"
+          >
+            Schedule Free Consultation
+          </a>
+        </section>
       </main>
       <Footer />
     </div>

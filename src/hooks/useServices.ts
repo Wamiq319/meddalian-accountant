@@ -1,9 +1,10 @@
 import { useMemo } from "react";
-import { SERVICE_SECTIONS } from "@/constants/services";
+import { SERVICES } from "@/constants/services";
+import { Service } from "@/types/service";
 
-export function useServiceSections(sectionId?: string) {
+export function useServices(sectionId?: Service["sectionId"]) {
   return useMemo(() => {
-    if (!sectionId) return SERVICE_SECTIONS;
-    return SERVICE_SECTIONS.filter((section) => section.id === sectionId);
+    if (!sectionId) return SERVICES;
+    return SERVICES.filter((service) => service.sectionId === sectionId);
   }, [sectionId]);
 }
