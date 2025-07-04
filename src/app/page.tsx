@@ -11,57 +11,7 @@ import {
   FaLightbulb,
   FaChevronDown,
 } from "react-icons/fa";
-
-const SERVICE_SECTIONS = [
-  {
-    id: "taxation",
-    title: "Taxation Services",
-    items: [
-      "Personal Income Tax",
-      "Value Added Tax (VAT)",
-      "Corporation Tax",
-      "Capital Gains Tax",
-      "Inheritance Tax",
-      "Tax Preparation and Planning",
-      "VAT Registration",
-      "Self Assessment",
-      "HMRC Problem Resolution",
-    ],
-  },
-  {
-    id: "planning",
-    title: "Business Start-up & Planning",
-    items: [
-      "Business Start-ups Consultation",
-      "Raising Finance and Business Plans",
-      "Business Growth Strategies",
-      "Strategic Business Planning",
-      "Company Formation",
-      "Construction Industry Scheme",
-      "Offshore Incorporation",
-      "Business Plan / Cash Flow Forecast",
-    ],
-  },
-  {
-    id: "payroll",
-    title: "Payroll Services",
-    items: [
-      "Payroll Processing",
-      "PAYE Setup and Management",
-      "Auto Enrolment Support",
-      "RTI (Real Time Information) Filing",
-    ],
-  },
-  {
-    id: "audits",
-    title: "Audits & Compliance",
-    items: [
-      "Statutory Bookkeeping",
-      "Audit Preparation",
-      "Compliance and Record Maintenance",
-    ],
-  },
-];
+import { useServiceSections } from "@/hooks/useServices";
 
 const HERO_BUTTONS = [
   {
@@ -96,6 +46,7 @@ function scrollToSection(id: string) {
 }
 
 export default function Home() {
+  const sections = useServiceSections();
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
@@ -156,7 +107,7 @@ export default function Home() {
 
         {/* Service Sections */}
         <div className="space-y-10 max-w-4xl mx-auto w-full px-4">
-          {SERVICE_SECTIONS.map((section) => (
+          {sections.map((section) => (
             <section key={section.title} id={section.id}>
               <h2 className="text-2xl font-semibold mb-4 text-blue-700">
                 {section.title}

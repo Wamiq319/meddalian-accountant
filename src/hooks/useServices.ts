@@ -1,10 +1,9 @@
 import { useMemo } from "react";
-import { SERVICES } from "@/constants/services";
-import { Service } from "@/types/service";
+import { SERVICE_SECTIONS } from "@/constants/services";
 
-export function useServices(category?: string): Service[] {
+export function useServiceSections(sectionId?: string) {
   return useMemo(() => {
-    if (!category) return SERVICES;
-    return SERVICES.filter((service) => service.category === category);
-  }, [category]);
+    if (!sectionId) return SERVICE_SECTIONS;
+    return SERVICE_SECTIONS.filter((section) => section.id === sectionId);
+  }, [sectionId]);
 }
