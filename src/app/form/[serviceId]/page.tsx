@@ -1,7 +1,7 @@
 "use client";
 import { useState, use } from "react";
 import { SERVICES } from "@/constants/services";
-import { Service } from "@/types/service";
+
 import StepBasicInfo from "../StepBasicInfo";
 import StepServiceInfo from "../StepServiceInfo";
 import StepCheckout from "../StepCheckout";
@@ -47,23 +47,25 @@ export default function ServiceFormPage({
   const { serviceId } = use(params);
   const service = SERVICES.find((s) => s.id === serviceId);
 
+  const [step, setStep] = useState(0);
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   if (!service) {
     return (
       <div className="text-center text-red-500 py-12">Service not found.</div>
     );
   }
 
-  const [step, setStep] = useState(0);
-  const [formData, setFormData] = useState<any>({});
-  const [errors, setErrors] = useState<any>({});
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
-  function handleChange(name: string, value: any) {
-    setFormData((prev: any) => ({ ...prev, [name]: value }));
+  function handleChange(name: string, value: string) {
+    setFormData((prev: Record<string, string>) => ({ ...prev, [name]: value }));
   }
 
-  function validate(fields: any[]) {
-    const newErrors: any = {};
+  function validate(
+    fields: Array<{ name: string; label: string; required?: boolean }>
+  ) {
+    const newErrors: Record<string, string> = {};
     fields.forEach((f) => {
       if (f.required && !formData[f.name]) {
         newErrors[f.name] = `${f.label} is required`;
@@ -74,18 +76,17 @@ export default function ServiceFormPage({
   }
 
   function handleNext() {
-    let currentFields: any[] = [];
     if (step === 0) {
-      // Basic fields are now hardcoded in StepBasicInfo
-      currentFields = [
-        { name: "name", label: "Full Name", required: true },
-        { name: "company", label: "Company Name", required: true },
-        { name: "email", label: "Email Address", required: true },
-        { name: "phone", label: "Phone Number", required: true },
-        { name: "position", label: "Job Position", required: true },
-      ];
-    } else if (step === 1) currentFields = service!.formFields;
-    if (step < 2 && !validate(currentFields)) return;
+      // For step 0, we don't need validation as StepBasicInfo handles its own fields
+      setStep((s) => s + 1);
+      return;
+    }
+
+    if (step === 1) {
+      // Validate service-specific fields
+      if (!validate(service!.formFields)) return;
+    }
+
     setStep((s) => s + 1);
   }
 

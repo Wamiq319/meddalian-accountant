@@ -12,7 +12,7 @@ import {
 import Image from "next/image";
 
 interface StepCheckoutProps {
-  values: any;
+  values: Record<string, string>;
   service: Service;
 }
 
@@ -49,8 +49,8 @@ export default function StepCheckout({ values, service }: StepCheckoutProps) {
               </h3>
             </div>
             <p className="text-blue-100 text-xs lg:text-sm leading-relaxed">
-              Please carefully review all the information you've provided before
-              proceeding with your order.
+              Please carefully review all the information you&apos;ve provided
+              before proceeding with your order.
             </p>
           </div>
 

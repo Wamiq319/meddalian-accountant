@@ -1,12 +1,13 @@
 import Input from "@/components/Input";
 import { ServiceFormField } from "@/types/service";
-import { FiFileText, FiInfo, FiShield, FiCheckCircle } from "react-icons/fi";
+import { FiFileText, FiInfo, FiCheckCircle } from "react-icons/fi";
+import { useState, useEffect } from "react";
 
 interface StepServiceInfoProps {
   fields: ServiceFormField[];
-  values: any;
-  errors: any;
-  onChange: (name: string, value: any) => void;
+  values: Record<string, string>;
+  errors: Record<string, string>;
+  onChange: (name: string, value: string) => void;
 }
 
 export default function StepServiceInfo({
@@ -15,6 +16,12 @@ export default function StepServiceInfo({
   errors,
   onChange,
 }: StepServiceInfoProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   if (!fields || fields.length === 0)
     return (
       <div className="text-center py-8 lg:py-12">
@@ -48,6 +55,14 @@ export default function StepServiceInfo({
       }
     }
   }
+
+  // Calculate progress only on client side
+  const completedFields = mounted
+    ? fields.filter((field) => values[field.name]).length
+    : 0;
+  const progressPercentage = mounted
+    ? Math.min((completedFields / fields.length) * 100, 100)
+    : 0;
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
@@ -154,20 +169,15 @@ export default function StepServiceInfo({
           <div className="flex items-center justify-between text-xs lg:text-sm">
             <span className="text-blue-700 font-medium">Form Progress</span>
             <span className="text-[#e94e1b] font-medium">
-              {fields.filter((field) => values[field.name]).length} of{" "}
-              {fields.length} fields completed
+              {mounted ? completedFields : 0} of {fields.length} fields
+              completed
             </span>
           </div>
           <div className="mt-2 w-full bg-blue-200 rounded-full h-2 overflow-hidden">
             <div
               className="bg-gradient-to-r from-blue-500 to-[#e94e1b] h-2 rounded-full transition-all duration-300"
               style={{
-                width: `${Math.min(
-                  (fields.filter((field) => values[field.name]).length /
-                    fields.length) *
-                    100,
-                  100
-                )}%`,
+                width: `${progressPercentage}%`,
               }}
             />
           </div>

@@ -37,11 +37,11 @@ export default function StepSuccess() {
         <ul className="text-sm text-green-700 space-y-1 text-left">
           <li className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            We'll review your request within 24 hours
+            We&apos;ll review your request within 24 hours
           </li>
           <li className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            You'll receive a confirmation email
+            You&apos;ll receive a confirmation email
           </li>
           <li className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>

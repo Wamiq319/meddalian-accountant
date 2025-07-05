@@ -23,7 +23,7 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`px-5 py-2 rounded font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${COLORS[variant]} ${className}`}
+      className={`px-5 py-2 rounded font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer ${COLORS[variant]} ${className}`}
       {...props}
     >
       {children}

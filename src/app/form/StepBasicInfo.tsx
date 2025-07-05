@@ -5,9 +5,9 @@ import {
   FiPhone,
   FiBriefcase,
   FiHome,
-  FiShield,
   FiInfo,
 } from "react-icons/fi";
+import { useState, useEffect } from "react";
 
 interface Field {
   name: string;
@@ -20,9 +20,9 @@ interface Field {
 }
 
 interface StepBasicInfoProps {
-  values: any;
-  errors: any;
-  onChange: (name: string, value: any) => void;
+  values: Record<string, string>;
+  errors: Record<string, string>;
+  onChange: (name: string, value: string) => void;
 }
 
 const BASIC_FIELDS: Field[] = [
@@ -73,6 +73,12 @@ export default function StepBasicInfo({
   errors,
   onChange,
 }: StepBasicInfoProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Group fields into pairs for two-column layout, keeping textareas in their own row
   const groupedFields = [];
   let currentGroup = [];
@@ -97,6 +103,14 @@ export default function StepBasicInfo({
       }
     }
   }
+
+  // Calculate progress only on client side
+  const completedFields = mounted
+    ? Object.keys(values).filter((key) => values[key]).length
+    : 0;
+  const progressPercentage = mounted
+    ? Math.min((completedFields / BASIC_FIELDS.length) * 100, 100)
+    : 0;
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
@@ -202,20 +216,15 @@ export default function StepBasicInfo({
           <div className="flex items-center justify-between text-xs lg:text-sm">
             <span className="text-blue-700 font-medium">Form Progress</span>
             <span className="text-[#e94e1b] font-medium">
-              {Object.keys(values).filter((key) => values[key]).length} of{" "}
-              {BASIC_FIELDS.length} fields completed
+              {mounted ? completedFields : 0} of {BASIC_FIELDS.length} fields
+              completed
             </span>
           </div>
           <div className="mt-2 w-full bg-blue-200 rounded-full h-2 overflow-hidden">
             <div
               className="bg-gradient-to-r from-blue-500 to-[#e94e1b] h-2 rounded-full transition-all duration-300"
               style={{
-                width: `${Math.min(
-                  (Object.keys(values).filter((key) => values[key]).length /
-                    BASIC_FIELDS.length) *
-                    100,
-                  100
-                )}%`,
+                width: `${progressPercentage}%`,
               }}
             />
           </div>
