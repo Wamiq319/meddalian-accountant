@@ -52,7 +52,7 @@ export default function Home() {
       <Navbar />
       <main className="flex-1 w-full px-0">
         {/* Hero Section */}
-        <section className="relative w-full rounded-none overflow-hidden mb-12 bg-gradient-to-br from-[#e94e1b]/10 via-white to-[#0072bc]/10 flex flex-col items-center justify-center py-12 px-4 text-center">
+        <section className="relative w-full rounded-none overflow-hidden mb-12 bg-gradient-to-br from-blue-50 via-white to-[#e94e1b]/10 flex flex-col items-center justify-center py-12 px-4 text-center">
           <div className="flex flex-col items-center gap-4 w-full max-w-4xl mx-auto">
             <Image
               src="/logo.png"
@@ -77,7 +77,7 @@ export default function Home() {
                 <button
                   key={btn.id}
                   onClick={() => scrollToSection(btn.id)}
-                  className="flex items-center justify-center bg-white border-2 border-[#e94e1b] text-[#e94e1b] hover:bg-[#e94e1b] hover:text-white font-semibold rounded-full px-6 py-3 text-lg shadow transition-colors duration-200 min-w-[160px]"
+                  className="flex items-center justify-center bg-white border-2 border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white font-semibold rounded-full px-6 py-3 text-lg shadow transition-colors duration-200 min-w-[160px]"
                 >
                   {btn.icon}
                   {btn.label}
@@ -92,14 +92,14 @@ export default function Home() {
               viewBox="0 0 200 200"
               fill="none"
             >
-              <circle cx="100" cy="100" r="100" fill="#e94e1b" />
+              <circle cx="100" cy="100" r="100" fill="#3b82f6" />
             </svg>
             <svg
               className="absolute bottom-0 right-0 w-40 h-40 opacity-10"
               viewBox="0 0 200 200"
               fill="none"
             >
-              <circle cx="100" cy="100" r="100" fill="#0072bc" />
+              <circle cx="100" cy="100" r="100" fill="#e94e1b" />
             </svg>
           </div>
         </section>
@@ -117,10 +117,10 @@ export default function Home() {
               return (
                 <section key={section.id} id={section.id}>
                   <div className="flex flex-col items-center mb-4">
-                    <div className="flex items-center justify-center text-blue-700 text-3xl mb-2">
+                    <div className="flex items-center justify-center text-blue-600 text-3xl mb-2">
                       {section.icon}
                     </div>
-                    <h2 className="text-3xl font-bold text-blue-700 text-center">
+                    <h2 className="text-3xl font-bold text-blue-600 text-center">
                       {section.label}
                     </h2>
                   </div>
@@ -135,26 +135,28 @@ export default function Home() {
                           .map((service) => (
                             <div
                               key={service.id}
-                              className="bg-white shadow rounded-lg p-4 flex flex-col justify-between min-h-0"
+                              className="bg-white shadow-lg rounded-xl p-6 flex flex-col justify-between min-h-0 border border-gray-100 hover:shadow-xl transition-shadow duration-200"
                             >
                               <div>
-                                <h4 className="text-lg font-bold mb-2 text-gray-900">
+                                <h4 className="text-lg font-bold mb-3 text-gray-900">
                                   {service.title}
                                 </h4>
-                                <p className="text-gray-600 mb-2">
+                                <p className="text-gray-600 mb-3">
                                   {service.description}
                                 </p>
-                                <ul className="list-disc list-inside text-gray-700 mb-2">
+                                <ul className="list-disc list-inside text-gray-700 mb-3 space-y-1">
                                   {service.features.map((feature, idx) => (
-                                    <li key={idx}>{feature}</li>
+                                    <li key={idx} className="text-sm">
+                                      {feature}
+                                    </li>
                                   ))}
                                 </ul>
-                                <div className="text-xl font-bold text-[#e94e1b] mb-2">
+                                <div className="text-2xl font-bold text-[#e94e1b] mb-3">
                                   ${service.price}
                                 </div>
                               </div>
                               <Button
-                                className="w-full mt-1"
+                                className="w-full mt-2 bg-[#e94e1b] hover:bg-[#c43d13]"
                                 onClick={() =>
                                   (window.location.href = `/form/${service.id}`)
                                 }
@@ -173,10 +175,10 @@ export default function Home() {
             return (
               <section key={section.id} id={section.id}>
                 <div className="flex flex-col items-center mb-4">
-                  <div className="flex items-center justify-center text-blue-700 text-3xl mb-2">
+                  <div className="flex items-center justify-center text-blue-600 text-3xl mb-2">
                     {section.icon}
                   </div>
-                  <h2 className="text-3xl font-bold text-blue-700 text-center">
+                  <h2 className="text-3xl font-bold text-blue-600 text-center">
                     {section.label}
                   </h2>
                 </div>
@@ -184,26 +186,28 @@ export default function Home() {
                   {services.map((service) => (
                     <div
                       key={service.id}
-                      className="bg-white shadow rounded-lg p-4 flex flex-col justify-between min-h-0"
+                      className="bg-white shadow-lg rounded-xl p-6 flex flex-col justify-between min-h-0 border border-gray-100 hover:shadow-xl transition-shadow duration-200"
                     >
                       <div>
-                        <h3 className="text-lg font-bold mb-2 text-gray-900">
+                        <h3 className="text-lg font-bold mb-3 text-gray-900">
                           {service.title}
                         </h3>
-                        <p className="text-gray-600 mb-2">
+                        <p className="text-gray-600 mb-3">
                           {service.description}
                         </p>
-                        <ul className="list-disc list-inside text-gray-700 mb-2">
+                        <ul className="list-disc list-inside text-gray-700 mb-3 space-y-1">
                           {service.features.map((feature, idx) => (
-                            <li key={idx}>{feature}</li>
+                            <li key={idx} className="text-sm">
+                              {feature}
+                            </li>
                           ))}
                         </ul>
-                        <div className="text-xl font-bold text-[#e94e1b] mb-2">
+                        <div className="text-2xl font-bold text-[#e94e1b] mb-3">
                           ${service.price}
                         </div>
                       </div>
                       <Button
-                        className="w-full mt-1"
+                        className="w-full mt-2 bg-[#e94e1b] hover:bg-[#c43d13]"
                         onClick={() =>
                           (window.location.href = `/form/${service.id}`)
                         }
@@ -218,8 +222,8 @@ export default function Home() {
           })}
         </div>
         {/* Free Consultation Section */}
-        <section className="w-full bg-blue-50 py-12 mt-10 flex flex-col items-center justify-center text-center rounded-lg shadow-inner">
-          <h2 className="text-3xl font-bold text-blue-700 mb-4">
+        <section className="w-full bg-gradient-to-br from-blue-50 to-[#e94e1b]/5 py-12 mt-10 flex flex-col items-center justify-center text-center rounded-xl shadow-inner border border-blue-100">
+          <h2 className="text-3xl font-bold text-blue-600 mb-4">
             Book a Free Consultation Call
           </h2>
           <p className="text-lg text-gray-700 mb-6 max-w-xl">
@@ -230,7 +234,7 @@ export default function Home() {
           </p>
           <a
             href="/consultation"
-            className="inline-block bg-[#e94e1b] text-white font-semibold rounded-full px-8 py-4 text-lg shadow hover:bg-[#c43d13] transition-colors duration-200"
+            className="inline-block bg-[#e94e1b] text-white font-semibold rounded-full px-8 py-4 text-lg shadow-lg hover:bg-[#c43d13] transition-colors duration-200"
           >
             Schedule Free Consultation
           </a>
