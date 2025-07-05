@@ -99,7 +99,7 @@ export default function ServiceFormPage({
       console.log("Form submitted:", formData);
       setSubmitError(null);
       setStep(3);
-    } catch (e) {
+    } catch {
       setSubmitError("Something went wrong. Please try again.");
     }
   }

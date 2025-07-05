@@ -10,7 +10,6 @@ import {
   FaMoneyCheckAlt,
   FaPercent,
   FaLightbulb,
-  FaChevronDown,
 } from "react-icons/fa";
 import { useServices } from "@/hooks/useServices";
 import { Service } from "@/types/service";
@@ -49,6 +48,12 @@ function scrollToSection(id: string) {
 
 export default function Home() {
   const router = useRouter();
+
+  // Move useServices hooks outside the callback to follow Rules of Hooks
+  const auditServices = useServices("audits");
+  const payrollServices = useServices("payroll");
+  const taxationServices = useServices("taxation");
+  const planningServices = useServices("planning");
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -110,7 +115,23 @@ export default function Home() {
         {/* Service Sections */}
         <div className="space-y-6 w-full px-14">
           {SECTIONS.map((section) => {
-            const services = useServices(section.id as Service["sectionId"]);
+            // Get services based on section ID
+            let services: Service[] = [];
+            switch (section.id) {
+              case "audits":
+                services = auditServices;
+                break;
+              case "payroll":
+                services = payrollServices;
+                break;
+              case "taxation":
+                services = taxationServices;
+                break;
+              case "planning":
+                services = planningServices;
+                break;
+            }
+
             // Group services by subcategory if present
             const subcategories = Array.from(
               new Set(services.map((s) => s.subcategory).filter(Boolean))
@@ -230,8 +251,8 @@ export default function Home() {
           <p className="text-lg text-gray-700 mb-6 max-w-xl">
             Not sure which service is right for you? Schedule a free,
             no-obligation consultation call with one of our expert accountants.
-            We'll help you find the best solution for your business or personal
-            needs.
+            We&apos;ll help you find the best solution for your business or
+            personal needs.
           </p>
           <a
             href="/consultation"
