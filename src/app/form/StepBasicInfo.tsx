@@ -77,6 +77,23 @@ export default function StepBasicInfo({
 
   useEffect(() => {
     setMounted(true);
+
+    // Autofill from sessionStorage if exists
+    const sessionKey = "basicInfo";
+    const sessionData = sessionStorage.getItem(sessionKey);
+    if (sessionData) {
+      try {
+        const parsed = JSON.parse(sessionData);
+        BASIC_FIELDS.forEach((field) => {
+          if (parsed[field.name]) {
+            onChange(field.name, parsed[field.name]);
+          }
+        });
+      } catch (e) {
+        // ignore
+      }
+    }
+    // eslint-disable-next-line
   }, []);
 
   // Group fields into pairs for two-column layout, keeping textareas in their own row

@@ -1,5 +1,6 @@
 "use client";
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { SERVICES } from "@/constants/services";
 
 import StepBasicInfo from "../StepBasicInfo";
@@ -13,6 +14,7 @@ import {
   FiCheckCircle,
   FiArrowRight,
   FiArrowLeft,
+  FiRefreshCw,
 } from "react-icons/fi";
 import React from "react";
 
@@ -45,6 +47,7 @@ export default function ServiceFormPage({
   params: Promise<{ serviceId: string }>;
 }) {
   const { serviceId } = use(params);
+  const searchParams = useSearchParams();
   const service = SERVICES.find((s) => s.id === serviceId);
 
   const [step, setStep] = useState(0);
@@ -53,6 +56,97 @@ export default function ServiceFormPage({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Load existing session data when component mounts
+  useEffect(() => {
+    if (service) {
+      // Load basic info from global session
+      const basicInfoKey = "basicInfo";
+      const basicInfoData = sessionStorage.getItem(basicInfoKey);
+      if (basicInfoData) {
+        try {
+          const parsedBasicInfo = JSON.parse(basicInfoData);
+          setFormData((prev) => ({ ...prev, ...parsedBasicInfo }));
+        } catch (error) {
+          console.error("Error parsing basic info session data:", error);
+        }
+      }
+
+      // Load service-specific info
+      const serviceInfoKey = `serviceInfo_${service.id}`;
+      const serviceInfoData = sessionStorage.getItem(serviceInfoKey);
+      if (serviceInfoData) {
+        try {
+          const parsedServiceInfo = JSON.parse(serviceInfoData);
+          setFormData((prev) => ({ ...prev, ...parsedServiceInfo }));
+        } catch (error) {
+          console.error("Error parsing service info session data:", error);
+        }
+      }
+    }
+  }, [service]);
+
+  // Check for successful payment
+  useEffect(() => {
+    const success = searchParams.get("success");
+    const sessionId = searchParams.get("session_id");
+
+    if (success === "true" && sessionId) {
+      // Payment was successful, move to success step
+      setStep(3);
+
+      // Send order email with payment details
+      sendOrderEmailWithPayment(sessionId);
+    }
+  }, [searchParams, formData, service]);
+
+  const sendOrderEmailWithPayment = async (sessionId: string) => {
+    try {
+      if (!service) return;
+
+      // Get data from sessionStorage
+      const sessionKey = `formData_${service.id}`;
+      const sessionData = sessionStorage.getItem(sessionKey);
+      const dataToUse = sessionData ? JSON.parse(sessionData) : formData;
+
+      // Prepare customer info from form data
+      const customerInfo = {
+        name: dataToUse.name || "",
+        company: dataToUse.company || "",
+        email: dataToUse.email || "",
+        phone: dataToUse.phone || "",
+        position: dataToUse.position || "",
+      };
+
+      // Prepare service details (all form fields except basic info)
+      const serviceDetails = { ...dataToUse };
+      delete serviceDetails.name;
+      delete serviceDetails.company;
+      delete serviceDetails.email;
+      delete serviceDetails.phone;
+      delete serviceDetails.position;
+
+      // Send order email with payment details
+      const response = await fetch("/api/send-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customerInfo,
+          service,
+          serviceDetails,
+          sessionId,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to send order email");
+      }
+    } catch (error) {
+      console.error("Error sending order email:", error);
+    }
+  };
+
   if (!service) {
     return (
       <div className="text-center text-red-500 py-12">Service not found.</div>
@@ -60,7 +154,27 @@ export default function ServiceFormPage({
   }
 
   function handleChange(name: string, value: string) {
-    setFormData((prev: Record<string, string>) => ({ ...prev, [name]: value }));
+    const updatedData = { ...formData, [name]: value };
+    setFormData(updatedData);
+
+    // Determine which sessionStorage to update based on field type
+    const basicInfoFields = ["name", "company", "email", "phone", "position"];
+
+    if (basicInfoFields.includes(name)) {
+      // Save to global basic info session
+      const sessionKey = "basicInfo";
+      const existingData = sessionStorage.getItem(sessionKey);
+      const parsedData = existingData ? JSON.parse(existingData) : {};
+      parsedData[name] = value;
+      sessionStorage.setItem(sessionKey, JSON.stringify(parsedData));
+    } else if (service) {
+      // Save to service-specific session
+      const sessionKey = `serviceInfo_${service.id}`;
+      const existingData = sessionStorage.getItem(sessionKey);
+      const parsedData = existingData ? JSON.parse(existingData) : {};
+      parsedData[name] = value;
+      sessionStorage.setItem(sessionKey, JSON.stringify(parsedData));
+    }
   }
 
   function validate(
@@ -78,12 +192,26 @@ export default function ServiceFormPage({
 
   function handleNext() {
     if (step === 0) {
-      // For step 0, we don't need validation as StepBasicInfo handles its own fields
+      // Save basic info to global sessionStorage
+      const sessionKey = "basicInfo";
+      const step1Data: Record<string, string> = {};
+      ["name", "company", "email", "phone", "position"].forEach((key) => {
+        if (formData[key]) step1Data[key] = formData[key];
+      });
+      sessionStorage.setItem(sessionKey, JSON.stringify(step1Data));
       setStep((s) => s + 1);
       return;
     }
 
     if (step === 1) {
+      // Save service-specific info to sessionStorage
+      const sessionKey = `serviceInfo_${service!.id}`;
+      const step2Data: Record<string, string> = {};
+      service!.formFields.forEach((field) => {
+        if (formData[field.name]) step2Data[field.name] = formData[field.name];
+      });
+      sessionStorage.setItem(sessionKey, JSON.stringify(step2Data));
+
       // Validate service-specific fields
       if (!validate(service!.formFields)) return;
     }
@@ -93,6 +221,19 @@ export default function ServiceFormPage({
 
   function handleBack() {
     setStep((s) => s - 1);
+  }
+
+  function resetForm() {
+    setFormData({});
+    setStep(0);
+    setErrors({});
+    setSubmitError(null);
+    setIsSubmitting(false);
+    // Clear all sessionStorage related to the form
+    sessionStorage.removeItem("basicInfo");
+    if (service) {
+      sessionStorage.removeItem(`serviceInfo_${service.id}`);
+    }
   }
 
   async function handleSubmit() {
@@ -242,6 +383,7 @@ export default function ServiceFormPage({
                   values={formData}
                   errors={errors}
                   onChange={handleChange}
+                  serviceId={service.id} // Pass serviceId
                 />
                 <div className="flex justify-between mt-4 sm:mt-6">
                   <button
@@ -264,12 +406,7 @@ export default function ServiceFormPage({
             )}
 
             {step === 2 && (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSubmit();
-                }}
-              >
+              <div>
                 <StepCheckout values={formData} service={service} />
                 {submitError && (
                   <div className="text-red-500 text-center mt-4 p-3 bg-red-50 rounded-lg">
@@ -286,24 +423,15 @@ export default function ServiceFormPage({
                     Previous
                   </button>
                   <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-[#e94e1b] text-white font-medium hover:bg-[#c43d13] transition-colors duration-200 flex items-center gap-2 shadow-lg text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                    type="button"
+                    onClick={resetForm}
+                    className="px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-red-500 text-white font-medium hover:bg-red-600 transition-colors duration-200 flex items-center gap-2 text-sm sm:text-base"
                   >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <FiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                        Submit Order
-                      </>
-                    )}
+                    <FiRefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+                    Start Over
                   </button>
                 </div>
-              </form>
+              </div>
             )}
 
             {step === 3 && <StepSuccess />}

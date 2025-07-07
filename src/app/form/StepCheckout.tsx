@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Service } from "@/types/service";
 import {
   FiFileText,
@@ -10,6 +10,7 @@ import {
   FiCheckCircle,
 } from "react-icons/fi";
 import Image from "next/image";
+import { loadStripe } from "@stripe/stripe-js";
 
 interface StepCheckoutProps {
   values: Record<string, string>;
@@ -17,12 +18,108 @@ interface StepCheckoutProps {
 }
 
 export default function StepCheckout({ values, service }: StepCheckoutProps) {
+  const [displayValues, setDisplayValues] =
+    useState<Record<string, string>>(values);
+
+  // Load data from sessionStorage on mount
+  useEffect(() => {
+    const loadSessionData = () => {
+      const combinedData: Record<string, string> = {};
+
+      // Load basic info from global session
+      const basicInfoKey = "basicInfo";
+      const basicInfoData = sessionStorage.getItem(basicInfoKey);
+      if (basicInfoData) {
+        try {
+          const parsedBasicInfo = JSON.parse(basicInfoData);
+          Object.assign(combinedData, parsedBasicInfo);
+        } catch (error) {
+          console.error("Error parsing basic info session data:", error);
+        }
+      }
+
+      // Load service-specific info
+      const serviceInfoKey = `serviceInfo_${service.id}`;
+      const serviceInfoData = sessionStorage.getItem(serviceInfoKey);
+      if (serviceInfoData) {
+        try {
+          const parsedServiceInfo = JSON.parse(serviceInfoData);
+          Object.assign(combinedData, parsedServiceInfo);
+        } catch (error) {
+          console.error("Error parsing service info session data:", error);
+        }
+      }
+
+      // Merge with current values (current values take precedence)
+      setDisplayValues({ ...combinedData, ...values });
+    };
+
+    loadSessionData();
+  }, [service.id, values]);
+
   // Group form data into pairs for two-column layout
-  const formEntries = Object.entries(values);
+  const formEntries = Object.entries(displayValues);
   const groupedEntries = [];
   for (let i = 0; i < formEntries.length; i += 2) {
     groupedEntries.push(formEntries.slice(i, i + 2));
   }
+
+  const handleStripeCheckout = async () => {
+    try {
+      // Create a checkout session on your backend
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          service,
+          customerInfo: {
+            name: displayValues.name,
+            email: displayValues.email,
+            phone: displayValues.phone,
+          },
+          formData: displayValues,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error("API Error:", response.status, errorData);
+        throw new Error(
+          `Failed to create checkout session: ${response.status} - ${errorData}`
+        );
+      }
+
+      const { sessionId } = await response.json();
+
+      if (!sessionId) {
+        throw new Error("No session ID received from server");
+      }
+
+      // Redirect to Stripe Checkout
+      const stripe = await loadStripe(
+        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+      );
+      if (!stripe) {
+        throw new Error("Stripe failed to load");
+      }
+
+      const { error } = await stripe.redirectToCheckout({ sessionId });
+
+      if (error) {
+        console.error("Error:", error);
+        alert("Payment failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert(
+        `Something went wrong: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  };
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
@@ -62,8 +159,7 @@ export default function StepCheckout({ values, service }: StepCheckoutProps) {
               </h3>
             </div>
             <p className="text-blue-100 text-xs lg:text-sm leading-relaxed">
-              Your payment will be processed securely through our trusted
-              payment partners.
+              Your payment will be processed securely through Stripe.
             </p>
           </div>
 
@@ -145,17 +241,14 @@ export default function StepCheckout({ values, service }: StepCheckoutProps) {
           </div>
         </div>
 
-        {/* Payment Options */}
+        {/* Stripe Checkout Button */}
         <div className="bg-gray-50 rounded-xl p-3 lg:p-4">
           <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
             <FiCreditCard className="w-5 h-5 text-[#e94e1b]" />
             Payment Method
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <button
-              type="button"
-              className="flex items-center justify-center px-4 py-3 rounded-xl bg-white border border-gray-200 hover:border-blue-400 transition-colors duration-200 shadow-sm"
-            >
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="flex items-center gap-3 mb-4">
               <Image
                 src="/stripe.png"
                 alt="Stripe"
@@ -163,18 +256,20 @@ export default function StepCheckout({ values, service }: StepCheckoutProps) {
                 height={40}
                 className="w-10 h-10 object-contain"
               />
-            </button>
+              <span className="text-gray-700 font-semibold">
+                Secure Payment
+              </span>
+            </div>
+            <p className="text-gray-600 text-sm mb-4">
+              Click below to complete your payment securely through Stripe.
+            </p>
             <button
               type="button"
-              className="flex items-center justify-center px-4 py-3 rounded-xl bg-white border border-gray-200 hover:border-blue-400 transition-colors duration-200 shadow-sm"
+              onClick={handleStripeCheckout}
+              className="w-full bg-[#635bff] text-white py-3 px-6 rounded-xl font-semibold hover:bg-[#5548c8] transition-colors duration-200 flex items-center justify-center gap-2"
             >
-              <Image
-                src="/paypal.png"
-                alt="PayPal"
-                width={40}
-                height={40}
-                className="w-10 h-10 object-contain"
-              />
+              <FiCreditCard className="w-5 h-5" />
+              Pay with Stripe
             </button>
           </div>
         </div>

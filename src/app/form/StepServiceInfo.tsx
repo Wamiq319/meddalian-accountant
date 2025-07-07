@@ -8,6 +8,7 @@ interface StepServiceInfoProps {
   values: Record<string, string>;
   errors: Record<string, string>;
   onChange: (name: string, value: string) => void;
+  serviceId: string; // Add serviceId prop
 }
 
 export default function StepServiceInfo({
@@ -15,12 +16,30 @@ export default function StepServiceInfo({
   values,
   errors,
   onChange,
+  serviceId, // Add serviceId parameter
 }: StepServiceInfoProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+
+    // Autofill from sessionStorage if exists
+    const sessionKey = `serviceInfo_${serviceId}`;
+    const sessionData = sessionStorage.getItem(sessionKey);
+    if (sessionData) {
+      try {
+        const parsed = JSON.parse(sessionData);
+        fields.forEach((field) => {
+          if (parsed[field.name]) {
+            onChange(field.name, parsed[field.name]);
+          }
+        });
+      } catch (e) {
+        // ignore
+      }
+    }
+    // eslint-disable-next-line
+  }, [serviceId]);
 
   if (!fields || fields.length === 0)
     return (

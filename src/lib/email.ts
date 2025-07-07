@@ -23,10 +23,17 @@ interface OrderData {
   };
   service: Service;
   serviceDetails: Record<string, string>;
+  paymentDetails?: {
+    amount: string;
+    paymentStatus: string;
+    paymentMethod: string;
+    stripeSessionId: string;
+    stripePaymentIntent: string;
+  } | null;
 }
 
 export async function sendOrderEmail(orderData: OrderData) {
-  const { customerInfo, service, serviceDetails } = orderData;
+  const { customerInfo, service, serviceDetails, paymentDetails } = orderData;
 
   // Create HTML email template
   const htmlContent = `
@@ -43,6 +50,7 @@ export async function sendOrderEmail(orderData: OrderData) {
         .value { margin-left: 10px; }
         .service-details { background: #fff; padding: 15px; border-left: 4px solid #e94e1b; margin: 10px 0; }
         .price { font-size: 24px; font-weight: bold; color: #e94e1b; text-align: center; margin: 20px 0; }
+        .payment-section { background: #e8f5e8; padding: 15px; border-left: 4px solid #28a745; margin: 10px 0; }
       </style>
     </head>
     <body>
@@ -107,6 +115,46 @@ export async function sendOrderEmail(orderData: OrderData) {
             .join("")}
         </div>
 
+        ${
+          paymentDetails
+            ? `
+        <div class="section">
+          <h2>Payment Information</h2>
+          <div class="payment-section">
+            <div class="field">
+              <span class="label">Amount Paid:</span>
+              <span class="value">$${paymentDetails.amount}</span>
+            </div>
+            <div class="field">
+              <span class="label">Payment Status:</span>
+              <span class="value">${
+                paymentDetails.paymentStatus === "paid"
+                  ? "✅ Paid"
+                  : paymentDetails.paymentStatus
+              }</span>
+            </div>
+            <div class="field">
+              <span class="label">Payment Method:</span>
+              <span class="value">${
+                paymentDetails.paymentMethod === "card"
+                  ? "💳 Credit/Debit Card"
+                  : paymentDetails.paymentMethod
+              }</span>
+            </div>
+            <div class="field">
+              <span class="label">Transaction ID:</span>
+              <span class="value">${paymentDetails.stripeSessionId}</span>
+            </div>
+            <div class="field">
+              <span class="label">Payment Date:</span>
+              <span class="value">${new Date().toLocaleDateString()}</span>
+            </div>
+          </div>
+        </div>
+        `
+            : ""
+        }
+
         <div class="section">
           <h2>Next Steps</h2>
           <ul>
@@ -130,7 +178,9 @@ export async function sendOrderEmail(orderData: OrderData) {
   const mailOptions = {
     from: process.env.ADMIN_EMAIL, // Use your Gmail as sender
     to: process.env.ADMIN_EMAIL, // Send to yourself
-    subject: `New Order: ${service.title} - ${customerInfo.company}`,
+    subject: `New Order: ${service.title} - ${customerInfo.company}${
+      paymentDetails ? " (PAID)" : ""
+    }`,
     html: htmlContent,
   };
 
