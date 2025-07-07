@@ -128,7 +128,14 @@ export default function StepCheckout({ values, service }: StepCheckoutProps) {
                         {key.replace(/([A-Z])/g, " $1").trim()}
                       </span>
                       <span className="text-sm font-medium text-gray-900">
-                        {value as string}
+                        {key.toLowerCase().includes("amount") ||
+                        key.toLowerCase().includes("revenue") ||
+                        key.toLowerCase().includes("income") ||
+                        key.toLowerCase().includes("turnover") ||
+                        key.toLowerCase().includes("asset") ||
+                        key.toLowerCase().includes("value")
+                          ? `$${value}`
+                          : (value as string)}
                       </span>
                     </div>
                   ))}

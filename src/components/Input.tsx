@@ -51,12 +51,21 @@ export default function Input({
           ))}
         </select>
       ) : (
-        <input
-          type={variant}
-          className={baseStyle}
-          required={required}
-          {...props}
-        />
+        <div className="relative">
+          {label.includes("(USD)") && (
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-base">
+              $
+            </span>
+          )}
+          <input
+            type={variant}
+            className={
+              label.includes("(USD)") ? `${baseStyle} pl-8` : baseStyle
+            }
+            required={required}
+            {...props}
+          />
+        </div>
       )}
       {error && (
         <div className="flex items-center gap-1 text-red-500 text-sm mt-1">

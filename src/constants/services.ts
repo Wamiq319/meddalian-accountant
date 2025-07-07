@@ -31,7 +31,7 @@ export const SERVICES: Service[] = [
       },
       {
         name: "turnover",
-        label: "Annual Turnover",
+        label: "Annual Turnover (USD)",
         variant: "number",
         required: true,
       },
@@ -353,7 +353,7 @@ export const SERVICES: Service[] = [
     formFields: [
       {
         name: "financeAmount",
-        label: "Amount to Raise",
+        label: "Amount to Raise (USD)",
         variant: "number",
         required: true,
       },
@@ -529,7 +529,7 @@ export const SERVICES: Service[] = [
       },
       {
         name: "annualRevenue",
-        label: "Annual Revenue",
+        label: "Annual Revenue (USD)",
         variant: "number",
         required: true,
       },
@@ -772,7 +772,7 @@ export const SERVICES: Service[] = [
       },
       {
         name: "annualIncome",
-        label: "Annual Income",
+        label: "Annual Income (USD)",
         variant: "number",
         required: true,
       },
@@ -820,7 +820,7 @@ export const SERVICES: Service[] = [
       },
       {
         name: "assetValue",
-        label: "Asset Value",
+        label: "Asset Value (USD)",
         variant: "number",
         required: true,
       },
@@ -881,7 +881,7 @@ export const SERVICES: Service[] = [
       },
       {
         name: "amountInvolved",
-        label: "Amount Involved",
+        label: "Amount Involved (USD)",
         variant: "number",
         required: true,
       },
@@ -926,7 +926,7 @@ export const SERVICES: Service[] = [
       },
       {
         name: "turnover",
-        label: "Annual Turnover",
+        label: "Annual Turnover (USD)",
         variant: "number",
         required: true,
       },
@@ -970,7 +970,7 @@ export const SERVICES: Service[] = [
       },
       {
         name: "annualTurnover",
-        label: "Annual Turnover",
+        label: "Annual Turnover (USD)",
         variant: "number",
         required: true,
       },
@@ -1060,7 +1060,7 @@ export const SERVICES: Service[] = [
       },
       {
         name: "annualTurnover",
-        label: "Annual Turnover",
+        label: "Annual Turnover (USD)",
         variant: "number",
         required: true,
       },
@@ -1146,7 +1146,7 @@ export const SERVICES: Service[] = [
       },
       {
         name: "amountInvolved",
-        label: "Amount Involved",
+        label: "Amount Involved (USD)",
         variant: "number",
         required: true,
       },
@@ -1246,7 +1246,7 @@ export const SERVICES: Service[] = [
       },
       {
         name: "amountRequired",
-        label: "Amount Required",
+        label: "Amount Required (USD)",
         variant: "number",
         required: true,
       },
@@ -1303,7 +1303,7 @@ export const SERVICES: Service[] = [
       },
       {
         name: "currentRevenue",
-        label: "Current Annual Revenue",
+        label: "Current Annual Revenue (USD)",
         variant: "number",
         required: true,
       },

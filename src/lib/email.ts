@@ -92,7 +92,15 @@ export async function sendOrderEmail(orderData: OrderData) {
               <span class="label">${key
                 .replace(/([A-Z])/g, " $1")
                 .trim()}:</span>
-              <span class="value">${value}</span>
+              <span class="value">${
+                key.toLowerCase().includes("amount") ||
+                key.toLowerCase().includes("revenue") ||
+                key.toLowerCase().includes("income") ||
+                key.toLowerCase().includes("turnover") ||
+                key.toLowerCase().includes("asset")
+                  ? `$${value}`
+                  : value
+              }</span>
             </div>
           `
             )
