@@ -51,6 +51,7 @@ export default function ServiceFormPage({
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!service) {
     return (
@@ -94,13 +95,52 @@ export default function ServiceFormPage({
     setStep((s) => s - 1);
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     try {
+      setIsSubmitting(true);
       console.log("Form submitted:", formData);
       setSubmitError(null);
+
+      // Prepare customer info from form data
+      const customerInfo = {
+        name: formData.name || "",
+        company: formData.company || "",
+        email: formData.email || "",
+        phone: formData.phone || "",
+        position: formData.position || "",
+      };
+
+      // Prepare service details (all form fields except basic info)
+      const serviceDetails = { ...formData };
+      delete serviceDetails.name;
+      delete serviceDetails.company;
+      delete serviceDetails.email;
+      delete serviceDetails.phone;
+      delete serviceDetails.position;
+
+      // Send order email
+      const response = await fetch("/api/send-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customerInfo,
+          service,
+          serviceDetails,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send order email");
+      }
+
       setStep(3);
-    } catch {
+    } catch (error) {
+      console.error("Submit error:", error);
       setSubmitError("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -247,10 +287,20 @@ export default function ServiceFormPage({
                   </button>
                   <button
                     type="submit"
-                    className="px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-[#e94e1b] text-white font-medium hover:bg-[#c43d13] transition-colors duration-200 flex items-center gap-2 shadow-lg text-sm sm:text-base"
+                    disabled={isSubmitting}
+                    className="px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-[#e94e1b] text-white font-medium hover:bg-[#c43d13] transition-colors duration-200 flex items-center gap-2 shadow-lg text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <FiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                    Submit Order
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <FiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                        Submit Order
+                      </>
+                    )}
                   </button>
                 </div>
               </form>

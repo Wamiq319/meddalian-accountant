@@ -10,7 +10,7 @@ export default function Navbar() {
         <Link href="/">
           <Image
             src="/logo.png"
-            alt="Meddalian Logo"
+            alt="MEDALLION Logo"
             width={48}
             height={48}
             priority
@@ -25,19 +25,8 @@ export default function Navbar() {
           </span>
         </div>
       </div>
-      {/* Buttons on the right */}
-      <div className="flex gap-3">
-        <Link href="/login">
-          <Button variant="outline" className="rounded-full px-6">
-            Login
-          </Button>
-        </Link>
-        <Link href="/register">
-          <Button variant="primary" className="rounded-full px-6">
-            Sign Up
-          </Button>
-        </Link>
-      </div>
+      {/* Right side - empty for now */}
+      <div></div>
     </nav>
   );
 }

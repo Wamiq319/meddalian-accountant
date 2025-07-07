@@ -64,7 +64,7 @@ export default function Home() {
           <div className="flex flex-col items-center gap-4 w-full max-w-4xl mx-auto">
             <Image
               src="/logo.png"
-              alt="Meddalian Logo"
+              alt="MEDALLION Logo"
               width={72}
               height={72}
               className="mb-2"
@@ -73,7 +73,7 @@ export default function Home() {
             <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-2">
               Buy Professional Accounting Services
               <br />
-              from Meddalian Accountants
+              from MEDALLION Accountants
             </h1>
             <p className="text-lg sm:text-xl text-gray-700 max-w-2xl mb-6">
               Get expert help with tax, payroll, business planning, and more.
