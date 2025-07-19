@@ -54,29 +54,51 @@ export default function ServiceFormPage({
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const sendOrderEmailWithPayment = useCallback(
     async (sessionId: string) => {
       try {
         if (!service) return;
 
-        // Get data from sessionStorage
-        const sessionKey = `formData_${service.id}`;
-        const sessionData = sessionStorage.getItem(sessionKey);
-        const dataToUse = sessionData ? JSON.parse(sessionData) : formData;
+        // Get data from sessionStorage using the correct keys
+        const basicInfoKey = "basicInfo";
+        const serviceInfoKey = `serviceInfo_${service.id}`;
+
+        const basicInfoData = sessionStorage.getItem(basicInfoKey);
+        const serviceInfoData = sessionStorage.getItem(serviceInfoKey);
+
+        // Combine data from both sessionStorage keys
+        const combinedData = { ...formData };
+
+        if (basicInfoData) {
+          try {
+            const parsedBasicInfo = JSON.parse(basicInfoData);
+            Object.assign(combinedData, parsedBasicInfo);
+          } catch (error) {
+            console.error("Error parsing basic info session data:", error);
+          }
+        }
+
+        if (serviceInfoData) {
+          try {
+            const parsedServiceInfo = JSON.parse(serviceInfoData);
+            Object.assign(combinedData, parsedServiceInfo);
+          } catch (error) {
+            console.error("Error parsing service info session data:", error);
+          }
+        }
 
         // Prepare customer info from form data
         const customerInfo = {
-          name: dataToUse.name || "",
-          company: dataToUse.company || "",
-          email: dataToUse.email || "",
-          phone: dataToUse.phone || "",
-          position: dataToUse.position || "",
+          name: combinedData.name || "",
+          company: combinedData.company || "",
+          email: combinedData.email || "",
+          phone: combinedData.phone || "",
+          position: combinedData.position || "",
         };
 
         // Prepare service details (all form fields except basic info)
-        const serviceDetails = { ...dataToUse };
+        const serviceDetails = { ...combinedData };
         delete serviceDetails.name;
         delete serviceDetails.company;
         delete serviceDetails.email;
@@ -231,60 +253,10 @@ export default function ServiceFormPage({
     setStep(0);
     setErrors({});
     setSubmitError(null);
-    setIsSubmitting(false);
     // Clear all sessionStorage related to the form
     sessionStorage.removeItem("basicInfo");
     if (service) {
       sessionStorage.removeItem(`serviceInfo_${service.id}`);
-    }
-  }
-
-  async function handleSubmit() {
-    try {
-      setIsSubmitting(true);
-      console.log("Form submitted:", formData);
-      setSubmitError(null);
-
-      // Prepare customer info from form data
-      const customerInfo = {
-        name: formData.name || "",
-        company: formData.company || "",
-        email: formData.email || "",
-        phone: formData.phone || "",
-        position: formData.position || "",
-      };
-
-      // Prepare service details (all form fields except basic info)
-      const serviceDetails = { ...formData };
-      delete serviceDetails.name;
-      delete serviceDetails.company;
-      delete serviceDetails.email;
-      delete serviceDetails.phone;
-      delete serviceDetails.position;
-
-      // Send order email
-      const response = await fetch("/api/send-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          customerInfo,
-          service,
-          serviceDetails,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to send order email");
-      }
-
-      setStep(3);
-    } catch (error) {
-      console.error("Submit error:", error);
-      setSubmitError("Something went wrong. Please try again.");
-    } finally {
-      setIsSubmitting(false);
     }
   }
 

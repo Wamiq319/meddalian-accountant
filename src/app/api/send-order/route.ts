@@ -71,42 +71,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Send email to admin with payment details if available
-    const emailHtml = `
-      <h2>New Service Order</h2>
-      <h3>Customer Info</h3>
-      <ul>
-        ${Object.entries(customerInfo)
-          .map(([k, v]) => `<li><b>${k}:</b> ${v}</li>`)
-          .join("")}
-      </ul>
-      <h3>Service Info</h3>
-      <ul>
-        ${Object.entries(serviceDetails)
-          .map(([k, v]) => `<li><b>${k}:</b> ${v}</li>`)
-          .join("")}
-      </ul>
-      <h3>Service Summary</h3>
-      <ul>
-        <li><b>Service:</b> ${service.title}</li>
-        <li><b>Price:</b> $${service.price}</li>
-      </ul>
-      ${
-        paymentDetails
-          ? `
-      <h3>Payment Details</h3>
-      <ul>
-        <li><b>Amount Paid:</b> $${paymentDetails.amount}</li>
-        <li><b>Currency:</b> USD</li>
-        <li><b>Status:</b> ${paymentDetails.paymentStatus}</li>
-        <li><b>Receipt:</b> <a href="https://dashboard.stripe.com/receipts/${paymentDetails.stripeSessionId}">View Receipt</a></li>
-        <li><b>Stripe Session ID:</b> ${paymentDetails.stripeSessionId}</li>
-      </ul>
-      `
-          : ""
-      }
-    `;
-
     await sendOrderEmail({
       customerInfo,
       service,

@@ -35,6 +35,41 @@ interface OrderData {
 export async function sendOrderEmail(orderData: OrderData) {
   const { customerInfo, service, serviceDetails, paymentDetails } = orderData;
 
+  // Debug logging to help identify the issue
+  console.log(
+    "Email Debug - Customer Info:",
+    JSON.stringify(customerInfo, null, 2)
+  );
+  console.log("Email Debug - Service:", JSON.stringify(service, null, 2));
+  console.log(
+    "Email Debug - Service Details:",
+    JSON.stringify(serviceDetails, null, 2)
+  );
+  console.log(
+    "Email Debug - Payment Details:",
+    JSON.stringify(paymentDetails, null, 2)
+  );
+
+  // Validate customer info structure
+  if (!customerInfo || typeof customerInfo !== "object") {
+    console.error("Email Error - Invalid customerInfo:", customerInfo);
+    throw new Error("Invalid customer information provided");
+  }
+
+  // Ensure all customer info fields exist
+  const validatedCustomerInfo = {
+    name: customerInfo.name || "Not provided",
+    company: customerInfo.company || "Not provided",
+    email: customerInfo.email || "Not provided",
+    phone: customerInfo.phone || "Not provided",
+    position: customerInfo.position || "Not provided",
+  };
+
+  console.log(
+    "Email Debug - Validated Customer Info:",
+    JSON.stringify(validatedCustomerInfo, null, 2)
+  );
+
   // Create HTML email template
   const htmlContent = `
     <!DOCTYPE html>

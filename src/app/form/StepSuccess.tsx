@@ -28,8 +28,8 @@ export default function StepSuccess() {
                     Thank You!
                   </h2>
                   <p className="text-orange-100 text-base lg:text-lg leading-relaxed mb-6">
-                    Your order has been successfully placed. We'll be in touch
-                    soon!
+                    Your order has been successfully placed. We&apos;ll be in
+                    touch soon!
                   </p>
                   <Button
                     onClick={handleGoHome}
