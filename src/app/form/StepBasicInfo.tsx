@@ -89,7 +89,7 @@ export default function StepBasicInfo({
             onChange(field.name, parsed[field.name]);
           }
         });
-      } catch (e) {
+      } catch {
         // ignore
       }
     }

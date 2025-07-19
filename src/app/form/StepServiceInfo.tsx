@@ -34,7 +34,7 @@ export default function StepServiceInfo({
             onChange(field.name, parsed[field.name]);
           }
         });
-      } catch (e) {
+      } catch {
         // ignore
       }
     }

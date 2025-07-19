@@ -1,5 +1,5 @@
 "use client";
-import { useState, use, useEffect } from "react";
+import { useState, use, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { SERVICES } from "@/constants/services";
 
@@ -56,6 +56,57 @@ export default function ServiceFormPage({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const sendOrderEmailWithPayment = useCallback(
+    async (sessionId: string) => {
+      try {
+        if (!service) return;
+
+        // Get data from sessionStorage
+        const sessionKey = `formData_${service.id}`;
+        const sessionData = sessionStorage.getItem(sessionKey);
+        const dataToUse = sessionData ? JSON.parse(sessionData) : formData;
+
+        // Prepare customer info from form data
+        const customerInfo = {
+          name: dataToUse.name || "",
+          company: dataToUse.company || "",
+          email: dataToUse.email || "",
+          phone: dataToUse.phone || "",
+          position: dataToUse.position || "",
+        };
+
+        // Prepare service details (all form fields except basic info)
+        const serviceDetails = { ...dataToUse };
+        delete serviceDetails.name;
+        delete serviceDetails.company;
+        delete serviceDetails.email;
+        delete serviceDetails.phone;
+        delete serviceDetails.position;
+
+        // Send order email with payment details
+        const response = await fetch("/api/send-order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            customerInfo,
+            service,
+            serviceDetails,
+            sessionId,
+          }),
+        });
+
+        if (!response.ok) {
+          console.error("Failed to send order email");
+        }
+      } catch (error) {
+        console.error("Error sending order email:", error);
+      }
+    },
+    [service, formData]
+  );
+
   // Load existing session data when component mounts
   useEffect(() => {
     if (service) {
@@ -97,55 +148,7 @@ export default function ServiceFormPage({
       // Send order email with payment details
       sendOrderEmailWithPayment(sessionId);
     }
-  }, [searchParams, formData, service]);
-
-  const sendOrderEmailWithPayment = async (sessionId: string) => {
-    try {
-      if (!service) return;
-
-      // Get data from sessionStorage
-      const sessionKey = `formData_${service.id}`;
-      const sessionData = sessionStorage.getItem(sessionKey);
-      const dataToUse = sessionData ? JSON.parse(sessionData) : formData;
-
-      // Prepare customer info from form data
-      const customerInfo = {
-        name: dataToUse.name || "",
-        company: dataToUse.company || "",
-        email: dataToUse.email || "",
-        phone: dataToUse.phone || "",
-        position: dataToUse.position || "",
-      };
-
-      // Prepare service details (all form fields except basic info)
-      const serviceDetails = { ...dataToUse };
-      delete serviceDetails.name;
-      delete serviceDetails.company;
-      delete serviceDetails.email;
-      delete serviceDetails.phone;
-      delete serviceDetails.position;
-
-      // Send order email with payment details
-      const response = await fetch("/api/send-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          customerInfo,
-          service,
-          serviceDetails,
-          sessionId,
-        }),
-      });
-
-      if (!response.ok) {
-        console.error("Failed to send order email");
-      }
-    } catch (error) {
-      console.error("Error sending order email:", error);
-    }
-  };
+  }, [searchParams, formData, service, sendOrderEmailWithPayment]);
 
   if (!service) {
     return (

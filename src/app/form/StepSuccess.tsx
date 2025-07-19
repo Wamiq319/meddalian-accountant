@@ -1,21 +1,6 @@
 import Button from "@/components/Button";
-import Input from "@/components/Input";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import {
-  FiCheckCircle,
-  FiMail,
-  FiTrendingUp,
-  FiClock,
-  FiMessageSquare,
-  FiHome,
-  FiInfo,
-  FiRefreshCw,
-} from "react-icons/fi";
-
-interface StepSuccessProps {
-  onReset?: () => void;
-}
+import { FiCheckCircle, FiClock, FiHome } from "react-icons/fi";
 
 export default function StepSuccess() {
   const router = useRouter();

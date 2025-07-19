@@ -23,9 +23,6 @@ export async function POST(request: NextRequest) {
     if (sessionId) {
       try {
         const session = await stripe.checkout.sessions.retrieve(sessionId);
-        const paymentIntent = await stripe.paymentIntents.retrieve(
-          session.payment_intent as string
-        );
 
         // Get the first charge to access payment method details
         const charges = await stripe.charges.list({
